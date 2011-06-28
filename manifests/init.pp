@@ -9,5 +9,5 @@ class mysql {
     require => Package["mysql"],
   }
   
-  service {"mysql": ensure => running, require => Package["mysql"] }
+  service {"mysql": ensure => running, require => Service["mysql"] }
 }
