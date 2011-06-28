@@ -6,7 +6,7 @@ class mysql {
     status  => "/sbin/service mysql status",
     stop    => "/sbin/service mysql stop",
     restart => "/sbin/service mysql restart",
-    require => [Package["mysql"],
+    require => Package["mysql"],
   }
   
   service {"mysql": ensure => running, require => Package["mysql"] }
