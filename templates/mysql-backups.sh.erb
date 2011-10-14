@@ -1,0 +1,25 @@
+BKPDIR="/var/backups/mysql/"
+mkdir -p $BKPDIR
+DAY=$(date +%d)
+DAY_OF_WEEK=$(date +%u)
+MONTH=$(date +%m)
+FULL_MONTH=$(date +%B | tr 'A-Z' 'a-z')
+YEAR=$(date +%Y)
+for LINE in `mysql -e 'show databases' -s -r | egrep -v "^(test|mysql|information_schema)$`; do
+  DAILY_OUT="$BKPDIR/$LINE-$YEAR$DAY$MONTH-daily.sql"
+  mysqldump $LINE > $DAILY_OUT
+  cp $DAILY_OUT $BKPDIR/$LINE-latest.sql
+  if [[ $DAY_OF_WEEK == "6" ]] ; then
+    WEEKLY_OUT="$BKPDIR/$LINE-$YEAR$DAY$MONTH-weekly.sql"
+    cp $DAILY_OUT $WEEKLY_OUT
+    MONTHLY_OUT="$BKPDIR/$LINE-$FULL_MONTH-monthly.sql"
+    if [[ ! -f $MONTHLY_OUT ]]; then
+      cp $DAILY_OUT $MONTHLY_OUT
+    fi
+  fi
+  find $BKPDIR -type f -mtime 7 | grep "daily.sql$" | xargs rm > /dev/null 2>&1
+  find $BKPDIR -type f -mtime 28 | grep "weekly.sql$" | xargs rm > /dev/null 2>&1
+  find $BKPDIR -type f -mtime 168 | grep "monthly.sql$" | xargs rm > /dev/null 2>&1
+done
+
+
